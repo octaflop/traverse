@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Traverse Demo{% endblock %}
+
+{% block content %}
+<section class="search">
+    <h2>🎬 Organic Traversal Demo</h2>
+    <p class="muted">No pre-planned routes. Every hop is a <b>live DuckDB search</b>.
+    We pick a random city, search within range for <b>airports</b>, <b>POIs</b>, and <b>waypoints</b>,
+    then jump to a random result and repeat with a new traversal method.</p>
+    <button hx-get="/demo/start"
+            hx-target="#demo-steps"
+            hx-swap="innerHTML"
+            hx-indicator=".spinner-demo"
+            onclick="startDemo()">
+        🎲 Shuffle & Start
+    </button>
+    <div class="spinner-demo htmx-indicator">Picking a random starting point…</div>
+</section>
+
+<section id="demo-log" style="display:none;">
+    <div id="demo-map" style="height: 400px; border-radius: 0.75rem; border: 1px solid #334155; margin-bottom: 1rem;"></div>
+    <div id="demo-steps"></div>
+</section>
+
+<style>
+.step {
+    background: var(--surface);
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #334155;
+    animation: fadeIn 400ms ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+.step-num {
+    background: #0f172a;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+.step-method {
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+}
+.step-from { color: var(--muted); }
+.step-choices { margin: 0; padding: 0; list-style: none; }
+.step-choices li {
+    padding: 0.35rem 0;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+.step-chosen {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #334155;
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+.step.done { border-color: #22c55e; }
+</style>
+
+<script>
+(function() {
+    var map = null;
+    var polylineLayer = null;
+    var markerLayer = null;
+    var steps = [];
+
+    function initMap() {
+        if (map) return;
+        map = L.map('demo-map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            opacity: 0.6
+        }).addTo(map);
+        polylineLayer = L.layerGroup().addTo(map);
+        markerLayer = L.layerGroup().addTo(map);
+    }
+
+    window.startDemo = function() {
+        document.getElementById('demo-log').style.display = 'block';
+        if (!map) initMap();
+        // Let HTMX load the first step; we'll update the map from mutation observer
+    };
+
+    function methodColor(method) {
+        var colors = {
+            walk: '#22c55e', bike: '#3b82f6', transit: '#a855f7', 'cessna 172': '#ef4444',
+            default: '#94a3b8'
+        };
+        return colors[method.toLowerCase()] || colors.default;
+    }
+
+    function updateMap() {
+        var stepEls = document.querySelectorAll('.step[data-step]');
+        if (!stepEls.length) return;
+
+        // Collect coords
+        var coords = [];
+        stepEls.forEach(function(el) {
+            var lat = parseFloat(el.dataset.fromLat);
+            var lon = parseFloat(el.dataset.fromLon);
+            var method = el.dataset.method;
+            if (!isNaN(lat) && !isNaN(lon)) {
+                coords.push({lat: lat, lon: lon, method: method});
+            }
+        });
+        if (!coords.length) return;
+
+        // Clear old layers
+        if (polylineLayer) polylineLayer.clearLayers();
+        if (markerLayer) markerLayer.clearLayers();
+
+        // Draw segments
+        for (var i = 0; i < coords.length - 1; i++) {
+            var color = methodColor(coords[i].method);
+            var poly = L.polyline(
+                [[coords[i].lat, coords[i].lon], [coords[i+1].lat, coords[i+1].lon]],
+                {color: color, weight: 3, opacity: 0.7, dashArray: '6,6'}
+            );
+            polylineLayer.addLayer(poly);
+        }
+
+        // Draw markers
+        coords.forEach(function(c, idx) {
+            var icon = L.divIcon({
+                className: '',
+                html: '<div style="background:' + methodColor(c.method) +
+                      ';width:10px;height:10px;border-radius:50%;border:2px solid #fff;"></div>',
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+            var m = L.marker([c.lat, c.lon], {icon: icon}).bindPopup('#' + (idx + 1) + ' ' + c.method);
+            markerLayer.addLayer(m);
+        });
+
+        // Fit
+        var lats = coords.map(function(c) { return c.lat; });
+        var lons = coords.map(function(c) { return c.lon; });
+        var bounds = [[Math.min(...lats), Math.min(...lons)], [Math.max(...lats), Math.max(...lons)]];
+        map.fitBounds(bounds, {padding: [40, 40], maxZoom: 14});
+    }
+
+    // Observe new steps and update map
+    var observer = new MutationObserver(function(mutations) {
+        var hasNew = false;
+        mutations.forEach(function(m) {
+            for (var i = 0; i < m.addedNodes.length; i++) {
+                if (m.addedNodes[i].classList && m.addedNodes[i].classList.contains('step')) {
+                    hasNew = true;
+                }
+            }
+        });
+        if (hasNew) updateMap();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var container = document.getElementById('demo-steps');
+        if (container) observer.observe(container, {childList: true, subtree: true});
+    });
+})();
+</script>
+{% endblock %}

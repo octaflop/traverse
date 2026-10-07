@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from traverse.services.geocode import geocode_location
+from traverse.services.osm import search_osm_pois
 from traverse.services.search import (
     current_season_context,
     search_airports,
@@ -48,6 +49,8 @@ async def search(
     airports = search_airports(lat, lon, method)
     pois = search_pois(lat, lon, method)
     user_waypoints = search_user_waypoints(lat, lon, method)
+    osm_pois = search_osm_pois(lat, lon, method)
+    all_pois = pois + osm_pois
 
     return templates.TemplateResponse(
         request,
@@ -60,9 +63,10 @@ async def search(
             "season": season_ctx,
             "airports": airports,
             "pois": pois,
+            "osm_pois": osm_pois,
             "user_waypoints": user_waypoints,
             "airports_json": json.dumps(airports),
-            "pois_json": json.dumps(pois),
+            "pois_json": json.dumps(all_pois),
             "waypoints_json": json.dumps(user_waypoints),
         },
     )

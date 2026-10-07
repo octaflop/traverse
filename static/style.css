@@ -248,7 +248,7 @@ button.danger {
     background: rgba(15, 23, 42, 0.3);
 }
 
-.spinner-src, .spinner-reg {
+.spinner-src, .spinner-reg, .spinner-osm {
     color: var(--muted);
     font-size: 0.85rem;
     grid-column: 1 / -1;
@@ -319,5 +319,52 @@ button.danger {
     margin-left: auto;
     font-size: 0.75rem;
     color: var(--muted);
+}
+
+/* Clickable traversal links */
+.list li.clickable {
+    cursor: pointer;
+    transition: background 150ms;
+    border-radius: 0.35rem;
+    margin: 0 -0.5rem;
+    padding: 0.75rem 0.5rem;
+}
+
+.list li.clickable:hover {
+    background: #0f172a;
+}
+
+.list li.clickable .jump {
+    opacity: 0;
+    transition: opacity 150ms;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.list li.clickable:hover .jump {
+    opacity: 1;
+}
+
+/* Demo animation */
+@keyframes pulse-dot {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+.traverse-marker {
+    transition: all 1s ease-in-out;
+}
+
+.traverse-pulse {
+    animation: pulse-dot 2s infinite;
+}
+
+.traverse-line {
+    stroke-dasharray: 10;
+    animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+    to { stroke-dashoffset: -20; }
 }
 

@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from traverse.api.autocomplete import router as autocomplete_router
+from traverse.api.demo import router as demo_router
+from traverse.api.osm import router as osm_router
 from traverse.api.pages import router as pages_router
 from traverse.api.search import router as search_router
 from traverse.api.sources import router as sources_router
@@ -28,6 +30,8 @@ app.include_router(pages_router)
 app.include_router(search_router)
 app.include_router(autocomplete_router)
 app.include_router(waypoints_router)
+app.include_router(osm_router)
+app.include_router(demo_router)
 app.include_router(sources_router)
 
 

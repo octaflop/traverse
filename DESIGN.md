@@ -14,6 +14,9 @@ Traverse is a web app written in python / fastapi and htmx to demonstrate the po
 
 - [x] Write a `README.md` with setup instructions and project overview
 - [x] Scaffold and deploy a working prototype of the design (FastAPI + HTMX + DuckDB)
+- [ ] Pull POIs dynamically from external sources instead of relying on a fixed CSV
+  - Ideas: query Overpass/OpenStreetMap (shops, restaurants, landmarks), integrate Google Places / Yelp / TripAdvisor APIs, scrape local event calendars, or use DuckDB `httpfs` against public datasets
+  - Seasonal events should surface automatically (e.g. fall-color maps in Japan, cherry blossom forecasts)
 
 ## References
 

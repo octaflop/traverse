@@ -1,0 +1,16 @@
+{% if results %}
+<ul class="list">
+    {% for p in results %}
+    <li>
+        <strong>{{ p.name }}</strong>
+        <span class="tag">{{ p.category or "osm" }}</span>
+        <span class="meta">{{ "%.1f" | format(p.distance_km) }} km</span>
+    </li>
+    {% endfor %}
+</ul>
+{% if has_more %}
+<p class="muted" style="font-size: 0.8rem;">Showing top results. Search a smaller area to narrow down.</p>
+{% endif %}
+{% else %}
+<p class="empty">No OSM POIs found nearby yet. Try fetching first!</p>
+{% endif %}

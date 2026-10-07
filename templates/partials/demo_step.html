@@ -1,0 +1,68 @@
+{% if done %}
+<div class="step done" data-step="{{ step }}">
+    <h4>🎉 Traversal complete</h4>
+    <p class="muted">Started from <b>{{ from_name }}</b> via {{ method }}.
+    Ran {{ step + 1 }} hops. Every stop was discovered live from DuckDB.</p>
+</div>
+{% else %}
+<div class="step" data-step="{{ step }}"
+     data-from-lat="{{ lat }}"
+     data-from-lon="{{ lon }}"
+     data-from-name="{{ from_name | e }}"
+     data-method="{{ method | e }}">
+    <div class="step-header">
+        <span class="step-num">#{{ step + 1 }}</span>
+        <span class="step-method">{{ method }}</span>
+        <span class="step-from">from <b>{{ from_name }}</b></span>
+    </div>
+
+    {% if results %}
+    <ul class="list step-choices">
+        {% for r in results[:6] %}
+        <li class="step-result">
+            {% if r._source == 'airport' %}
+            ✈️ <strong>{{ r.name }}</strong>
+            <code>{{ r.ident }}</code>
+            <span class="meta">{{ "%.1f" | format(r.distance_km) }} km</span>
+            {% else %}
+            📍 <strong>{{ r.name }}</strong>
+            <span class="tag">{{ r.type or r.category or r._source }}</span>
+            <span class="meta">{{ "%.1f" | format(r.distance_km) }} km</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">Nothing interesting within {{ method }} range from here.</p>
+    {% endif %}
+
+    {% if not done and next_name is defined %}
+    <div class="step-chosen">
+        ➜ Chose <b>{{ next_name }}</b> for next hop
+    </div>
+    {% endif %}
+</div>
+
+{% if not done and next_name is defined %}
+<div id="step-{{ step + 1 }}"
+     hx-post="/demo/step?from_name={{ next_name | urlencode }}&amp;lat={{ next_lat }}&amp;lon={{ next_lon }}&amp;method={{ next_method | urlencode }}&amp;step={{ step + 1 }}"
+     hx-target="#demo-steps"
+     hx-swap="beforeend"
+     hx-indicator=".spinner-step-{{ step + 1 }}">
+</div>
+<div class="spinner-step-{{ step + 1 }} htmx-indicator" style="padding:1rem;text-align:center;color:var(--muted);">
+    Discovering {{ next_method }} options around {{ next_name }}…
+</div>
+<script>
+(function() {
+    // Trigger the next step automatically after a brief pause
+    var el = document.getElementById('step-{{ step + 1 }}');
+    if (el) {
+        setTimeout(function() {
+            htmx.trigger(el, 'post');
+        }, 800 + ({{ step }} * 200));
+    }
+})();
+</script>
+{% endif %}
+{% endif %}

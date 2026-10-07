@@ -1,0 +1,14 @@
+<div class="osm-status" style="margin-top: 0.75rem; font-size: 0.85rem;">
+    {% if count %}
+    <p style="color: var(--muted); margin: 0;">{{ message }} You now have {{ count }} POIs in your local cache.</p>
+    <button class="small"
+            hx-get="/osm/nearby?lat={{ lat | default(0) }}&lon={{ lon | default(0) }}"
+            hx-target="#osm-results"
+            hx-swap="innerHTML">
+        Show nearby OSM POIs
+    </button>
+    <div id="osm-results"></div>
+    {% else %}
+    <p style="color: var(--muted); margin: 0;">{{ message }}</p>
+    {% endif %}
+</div>

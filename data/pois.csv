@@ -19,5 +19,27 @@ poi_id,name,type,lat,lon,city,country,tags,methods,seasons
 18,Fushimi Inari Shrine,culture,34.9671,135.7727,Fushimi,Japan,shrine;hiking;torii_gates,walk;bike;transit,all
 19,Arashiyama Bamboo Grove,park,35.0094,135.6668,Arashiyama,Japan,bamboo;nature;forest,walk;bike;transit,all
 20,Kinkaku-ji (Golden Pavilion),culture,35.0394,135.7292,Kita,Japan,temple;historic;garden,walk;bike;transit,all
-21,Mount Rainier,attraction,46.8523,-121.7603,Ashford,USA,mountain;hiking;views,walk;bike;transit,jun-sep
+21,Mount Rainier,attraction,46.8523,-121.7603,Ashford,USA,mountain;hiking;views,bike;transit,jun-sep
 22,Snoqualmie Falls,attraction,47.5417,-121.8377,Snoqualmie,USA,waterfall;nature;views,walk;bike;transit,apr-oct
+23,Nezu Shrine,culture,35.7203,139.7661,Bunkyo,Japan,temple;azalea_garden,walk;bike;transit,apr-may
+24,Goryokaku Tower,attraction,41.7945,140.7496,Hakodate,Japan,fort;cherry_blossom;night_view,walk;bike;transit,apr-may
+25,Jigokudani Monkey Park,attraction,36.7322,138.4620,Yamanouchi,Japan,onsen;monkeys;snow,walk;bike;transit,nov-mar
+26,Shirakawa-go,attraction,36.2578,136.9060,Shirakawa,Japan,traditional;village;snow;illumination,walk;bike;transit,dec-feb
+27,Arashiyama Maple Trees,park,35.0096,135.6670,Arashiyama,Japan,maple;autumn_colors;fall_foliage,walk;bike;transit,nov
+28,Kiyomizu-dera Temple,culture,34.9949,135.7850,Higashiyama,Japan,temple;views;autumn_foliage,walk;bike;transit,nov
+29,Enoshima Island,attraction,35.2550,139.4660,Enoshima,Japan,coast;sea_candle;tunnel,walk;bike;transit,jun-aug
+30,Magome-juku,attraction,35.5276,137.5698,Magome,Japan,nakasendo;traditional;mountain,walk;bike,all
+31,Lake Kawaguchi Maple Corridor,park,35.4989,138.7579,Kawaguchiko,Japan,maple;lake;mt_fuji;autumn,walk;bike;transit,nov
+32,Takayama Autumn Festival,culture,36.1461,137.2522,Takayama,Japan,festival;traditional;floats,walk;bike;transit,oct
+33,Osaka Castle,culture,34.6873,135.5259,Osaka,Japan,castle;historic;sakura,walk;bike;transit,mar-apr
+34,Osaka Expo Park,park,34.8062,135.5348,Osaka,Japan,tower_of_the_sun;autumn_foliage;sakura,walk;bike;transit,mar-apr;nov
+35,Rowena Crest Viewpoint,attraction,45.6979,-121.3087,Mosier,USA,wildflowers;wind; gorge_views;rolling_hills,bike;transit,apr-may
+36,Mount Hood National Forest,park,45.3319,-121.7113,Rhododendron,USA,mountain;hiking;waterfalls;forest,bike,jun-sep
+37,Crater Lake Rim Drive,attraction,42.9427,-122.1023,Crater Lake,USA,lake;volcanic;scenic_drive,transit,sep-oct
+38,Aspen Mirror Lake Trail,park,40.5936,-111.6334,Sundance,USA,alpine_lake;hiking;fall_colors,walk;bike,sep-oct
+39,Timpanogos Cave Trail,attraction,40.4404,-111.7095,American Fork Canyon,USA,cave;hiking;limestone;mountain_views,walk;transit,may-sep
+40,Alta Ski Area,attraction,40.5882,-111.6376,Alta,USA,ski;piste;powder,winter_sports;bus,dec-mar
+41,Bryce Canyon National Park,park,37.5930,-112.1871,Bryce Canyon,USA,hoodoos;sunrise;stargazing;rust_orange,hike;shuttle;bus,sep-nov
+42,Little Cottonwood Canyon,park,40.5777,-111.7545,Little Cottonwood,USA,aspen;fall_colors;granite;hiking,bike;hike;transit,sep-oct
+43,Watarrka National Park,park,-24.2657,131.5642,Kings Canyon,NT,gorge;waterfall;hiking;red_center,walk;hike;4wd,may-sep
+44,Hallett Cove Conservation Park,park,-35.0773,138.5080,Hallett Cove,SA,geology;cliffs;coastal;views,walk;transit,apr-oct
