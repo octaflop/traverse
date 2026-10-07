@@ -74,6 +74,21 @@
             Tags
             <input type="text" name="tags" placeholder="romantic, sunset">
         </label>
+        <label>
+            Methods
+            <select name="methods">
+                <option value="all">All traversal methods</option>
+                <option value="walk">Walking only</option>
+                <option value="bike">Bicycle only</option>
+                <option value="transit">Transit only</option>
+                <option value="cessna 172">Flying only</option>
+                <option value="walk;bike;transit">Ground transit (no flying)</option>
+            </select>
+        </label>
+        <label>
+            Seasons
+            <input type="text" name="seasons" placeholder="e.g. mar-apr or jun-sep or all">
+        </label>
         <button type="submit">Add</button>
         <div class="spinner-wp htmx-indicator">Adding…</div>
     </form>

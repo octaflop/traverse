@@ -327,7 +327,9 @@ def init_db() -> None:
         conn.execute(
             """
             CREATE TABLE pois AS
-            SELECT poi_id, name, type, lat, lon, city, country, tags
+            SELECT poi_id, name, type, lat, lon, city, country, tags,
+                   COALESCE(methods, 'walk;bike;transit') AS methods,
+                   COALESCE(seasons, 'all') AS seasons
             FROM read_csv(?, header=true, nullstr='')
             """,
             [str(POIS_CSV)],
@@ -337,7 +339,8 @@ def init_db() -> None:
     else:
         conn.execute(
             "CREATE TABLE pois (poi_id INTEGER, name VARCHAR, type VARCHAR, "
-            "lat DOUBLE, lon DOUBLE, city VARCHAR, country VARCHAR, tags VARCHAR)"
+            "lat DOUBLE, lon DOUBLE, city VARCHAR, country VARCHAR, tags VARCHAR, "
+            "methods VARCHAR DEFAULT 'walk;bike;transit', seasons VARCHAR DEFAULT 'all')"
         )
         print("No pois.csv found; created empty table.")
 

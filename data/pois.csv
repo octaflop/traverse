@@ -1,17 +1,23 @@
-poi_id,name,type,lat,lon,city,country,tags
-1,Sunshine Aquarium,attraction,35.7286,139.7195,Ikebukuro,Japan,aquarium;family
-2,Namjatown,attraction,35.7302,139.7194,Ikebukuro,Japan,theme_park;indoor
-3,Tokyo Metropolitan Theatre,culture,35.7296,139.7087,Ikebukuro,Japan,theatre;events
-4,Tokyo Metropolitan Government Building,attraction,35.6895,139.6917,Shinjuku,Japan,observatory;free
-5,Meiji Shrine,culture,35.6764,139.6993,Harajuku,Japan,shrine;nature
-6,Shibuya Crossing,attraction,35.6595,139.7004,Shibuya,Japan,landmark;shopping
-7,Tokyo Skytree,attraction,35.7100,139.8107,Sumida,Japan,tower;observatory
-8,Asakusa Senso-ji Temple,culture,35.7148,139.7967,Asakusa,Japan,temple;historic
-9,Ueno Park,attraction,35.7155,139.7739,Ueno,Japan,park;museum;zoo
-10,Akihabara Electric Town,attraction,35.6984,139.7731,Akihabara,Japan,shopping;anime
-11,Space Needle,attraction,47.6205,-122.3493,Seattle,USA,observatory;landmark
-12,Pike Place Market,attraction,47.6097,-122.3421,Seattle,USA,market;shopping
-13,Chihuly Garden and Glass,attraction,47.6206,-122.3508,Seattle,USA,art;museum
-14,Discovery Park,park,47.6585,-122.4051,Seattle,USA,nature;hiking
-15,Gas Works Park,park,47.6456,-122.3344,Seattle,USA,views;picnic
-16,Capitol Hill Block,attraction,47.6152,-122.3210,Seattle,USA,nightlife;food
+poi_id,name,type,lat,lon,city,country,tags,methods,seasons
+1,Sunshine Aquarium,attraction,35.7286,139.7195,Ikebukuro,Japan,aquarium;family,walk;bike;transit,all
+2,Namjatown,attraction,35.7302,139.7194,Ikebukuro,Japan,theme_park;indoor,walk;bike;transit,all
+3,Tokyo Metropolitan Theatre,culture,35.7296,139.7087,Ikebukuro,Japan,theatre;events,walk;bike;transit,all
+4,Tokyo Metropolitan Government Building,attraction,35.6895,139.6917,Shinjuku,Japan,observatory;free,walk;bike;transit,all
+5,Meiji Shrine,culture,35.6764,139.6993,Harajuku,Japan,shrine;nature,walk;bike;transit,all
+6,Shibuya Crossing,attraction,35.6595,139.7004,Shibuya,Japan,landmark;shopping,walk;bike;transit,all
+7,Tokyo Skytree,attraction,35.7100,139.8107,Sumida,Japan,tower;observatory,walk;bike;transit,all
+8,Asakusa Senso-ji Temple,culture,35.7148,139.7967,Asakusa,Japan,temple;historic,walk;bike;transit,all
+9,Ueno Park,attraction,35.7155,139.7739,Ueno,Japan,park;museum;zoo,walk;bike;transit,all
+10,Akihabara Electric Town,attraction,35.6984,139.7731,Akihabara,Japan,shopping;anime,walk;bike;transit,all
+11,Space Needle,attraction,47.6205,-122.3493,Seattle,USA,observatory;landmark,walk;bike;transit,all
+12,Pike Place Market,attraction,47.6097,-122.3421,Seattle,USA,market;shopping,walk;bike;transit,all
+13,Chihuly Garden and Glass,attraction,47.6206,-122.3508,Seattle,USA,art;museum,walk;bike;transit,all
+14,Discovery Park,park,47.6585,-122.4051,Seattle,USA,nature;hiking,walk;bike;transit,apr-oct
+15,Gas Works Park,park,47.6456,-122.3344,Seattle,USA,views;picnic,walk;bike;transit,may-sep
+16,Capitol Hill Block,attraction,47.6152,-122.3210,Seattle,USA,nightlife;food,walk;bike;transit,may-sep
+17,Shinjuku Gyoen,park,35.6852,139.7100,Shinjuku,Japan,park;cherry_blossom,walk;bike;transit,mar-apr
+18,Fushimi Inari Shrine,culture,34.9671,135.7727,Fushimi,Japan,shrine;hiking;torii_gates,walk;bike;transit,all
+19,Arashiyama Bamboo Grove,park,35.0094,135.6668,Arashiyama,Japan,bamboo;nature;forest,walk;bike;transit,all
+20,Kinkaku-ji (Golden Pavilion),culture,35.0394,135.7292,Kita,Japan,temple;historic;garden,walk;bike;transit,all
+21,Mount Rainier,attraction,46.8523,-121.7603,Ashford,USA,mountain;hiking;views,walk;bike;transit,jun-sep
+22,Snoqualmie Falls,attraction,47.5417,-121.8377,Snoqualmie,USA,waterfall;nature;views,walk;bike;transit,apr-oct

@@ -5,6 +5,10 @@
     <h3>Results for {{ location }} <span class="method">({{ method }})</span></h3>
     <p class="coords">Lat: {{ "%.4f" | format(lat) }}, Lon: {{ "%.4f" | format(lon) }}</p>
 
+    {% if season %}
+    <p class="season-banner">🗓️ Showing {{ season.month_name }} ({{ season.season }}) results</p>
+    {% endif %}
+
     <div id="map" style="height: 300px; margin-bottom: 1rem; border-radius: 0.75rem; border: 1px solid #334155;"
          data-location="{{ location | e }}"
          data-origin-lat="{{ lat | default(0) }}"
@@ -15,7 +19,7 @@
     </div>
 
     {% if airports %}
-    <h4>Airports</h4>
+    <h4>{% if method in "cessna 172" or method in "fly" or method in "pilot" %}Airports{% else %}Airports nearby{% endif %}</h4>
     <ul class="list">
         {% for a in airports %}
         <li>
@@ -33,7 +37,13 @@
         <li>
             <strong>{{ p.name }}</strong>
             <span class="tag">{{ p.type }}</span>
+            {% if p.in_season %}
+            <span class="tag season">{{ season.month_name }}</span>
+            {% endif %}
             <span class="meta">{{ p.city }} — {{ "%.1f" | format(p.distance_km) }} km</span>
+            {% if p.seasons and p.seasons != "all" %}
+            <span class="meta">🌿 {{ p.seasons }}</span>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>
@@ -46,14 +56,22 @@
         <li>
             <strong>{{ w.name }}</strong>
             <span class="tag">{{ w.type or "waypoint" }}</span>
+            {% if w.in_season %}
+            <span class="tag season">{{ season.month_name }}</span>
+            {% endif %}
             <span class="meta">{{ w.city or "" }} — {{ "%.1f" | format(w.distance_km) }} km</span>
+            {% if w.seasons and w.seasons != "all" %}
+            <span class="meta">🌿 {{ w.seasons }}</span>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>
     {% endif %}
 
     {% if not airports and not pois and not user_waypoints %}
-    <p class="empty">Nothing found within range. Try a different location or traversal method.</p>
+    <p class="empty">Nothing found within range for <b>{{ method }}</b> in {{ season.month_name if season else "this season" }}.
+    Try switching to a different traversal method (e.g. {% if "cessna" in method %}walking or biking{% else %}a wider search like transit or Cessna 172{% endif %})
+    or add your own waypoint below.</p>
     {% endif %}
 </div>
 {% endif %}

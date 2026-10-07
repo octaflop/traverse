@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 
 from traverse.services.geocode import geocode_location
 from traverse.services.search import (
+    current_season_context,
     search_airports,
     search_pois,
     search_user_waypoints,
@@ -22,6 +23,7 @@ async def search(
     method: str = Form("default"),
 ):
     coords = await geocode_location(location)
+    season_ctx = current_season_context()
     if coords is None:
         return templates.TemplateResponse(
             request,
@@ -29,6 +31,7 @@ async def search(
             {
                 "location": location,
                 "method": method,
+                "season": season_ctx,
                 "error": (
                     "Could not geocode that location. "
                     "Try an airport code (e.g. <b>KBFI</b>, <b>KSVR</b>) "
@@ -54,6 +57,7 @@ async def search(
             "method": method,
             "lat": lat,
             "lon": lon,
+            "season": season_ctx,
             "airports": airports,
             "pois": pois,
             "user_waypoints": user_waypoints,

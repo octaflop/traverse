@@ -26,8 +26,10 @@ async def create_waypoint(
     city: str = Form(""),
     country: str = Form(""),
     tags: str = Form(""),
+    methods: str = Form("all"),
+    seasons: str = Form("all"),
 ):
-    add_user_waypoint(name, type, lat, lon, city, country, tags)
+    add_user_waypoint(name, type, lat, lon, city, country, tags, methods, seasons)
     waypoints = list_user_waypoints()
     return templates.TemplateResponse(
         request, "partials/waypoints.html", {"waypoints": waypoints}

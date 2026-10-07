@@ -145,6 +145,20 @@ button:hover { filter: brightness(1.1); }
 
 .empty { color: var(--muted); }
 
+/* Seasonal styling */
+.season-banner {
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.tag.season {
+    background: #166534;
+    color: #86efac;
+    border-color: #22c55e;
+}
+
 footer small { color: #475569; }
 
 /* htmx indicator */

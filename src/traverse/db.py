@@ -66,8 +66,8 @@ def init_schema() -> None:
             f"Missing tables: {required - existing}. Run: python scripts/bootstrap.py"
         )
 
-    conn.execute(
-        """
+    # Ensure user_waypoints table exists and has all columns
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS user_waypoints (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name TEXT NOT NULL,
@@ -77,16 +77,26 @@ def init_schema() -> None:
             city TEXT,
             country TEXT,
             tags TEXT,
+            methods TEXT DEFAULT 'all',
+            seasons TEXT DEFAULT 'all',
             created_at TIMESTAMP DEFAULT current_timestamp
         )
-        """
-    )
+    """)
+    # Migrate: add columns if they don't exist (DuckDB doesn't have IF NOT EXISTS for ADD COLUMN)
+    try:
+        conn.execute("ALTER TABLE user_waypoints ADD COLUMN methods TEXT DEFAULT 'all'")
+    except Exception:
+        pass
+    try:
+        conn.execute("ALTER TABLE user_waypoints ADD COLUMN seasons TEXT DEFAULT 'all'")
+    except Exception:
+        pass
 
 
 def list_user_waypoints() -> list[dict]:
     conn = get_connection()
     res = conn.execute(
-        "SELECT id, name, type, lat, lon, city, country, tags, created_at "
+        "SELECT id, name, type, lat, lon, city, country, tags, methods, seasons, created_at "
         "FROM user_waypoints ORDER BY created_at DESC"
     )
     cols = [desc[0] for desc in res.description]
@@ -101,12 +111,14 @@ def add_user_waypoint(
     city: str,
     country: str,
     tags: str,
+    methods: str = "all",
+    seasons: str = "all",
 ) -> str:
     conn = get_connection()
     inserted = conn.execute(
-        "INSERT INTO user_waypoints (name, type, lat, lon, city, country, tags) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id",
-        [name, type, lat, lon, city, country, tags],
+        "INSERT INTO user_waypoints (name, type, lat, lon, city, country, tags, methods, seasons) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
+        [name, type, lat, lon, city, country, tags, methods, seasons],
     ).fetchone()
     return str(inserted[0])
 
