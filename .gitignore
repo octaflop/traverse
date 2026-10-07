@@ -1,6 +1,7 @@
 *.pyc
 __pycache__
 data/traverse.db
+data/traverse.db.wal
 data/cities500.txt
 data/cities500.zip
 
