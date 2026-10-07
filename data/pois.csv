@@ -1,0 +1,17 @@
+poi_id,name,type,lat,lon,city,country,tags
+1,Sunshine Aquarium,attraction,35.7286,139.7195,Ikebukuro,Japan,aquarium;family
+2,Namjatown,attraction,35.7302,139.7194,Ikebukuro,Japan,theme_park;indoor
+3,Tokyo Metropolitan Theatre,culture,35.7296,139.7087,Ikebukuro,Japan,theatre;events
+4,Tokyo Metropolitan Government Building,attraction,35.6895,139.6917,Shinjuku,Japan,observatory;free
+5,Meiji Shrine,culture,35.6764,139.6993,Harajuku,Japan,shrine;nature
+6,Shibuya Crossing,attraction,35.6595,139.7004,Shibuya,Japan,landmark;shopping
+7,Tokyo Skytree,attraction,35.7100,139.8107,Sumida,Japan,tower;observatory
+8,Asakusa Senso-ji Temple,culture,35.7148,139.7967,Asakusa,Japan,temple;historic
+9,Ueno Park,attraction,35.7155,139.7739,Ueno,Japan,park;museum;zoo
+10,Akihabara Electric Town,attraction,35.6984,139.7731,Akihabara,Japan,shopping;anime
+11,Space Needle,attraction,47.6205,-122.3493,Seattle,USA,observatory;landmark
+12,Pike Place Market,attraction,47.6097,-122.3421,Seattle,USA,market;shopping
+13,Chihuly Garden and Glass,attraction,47.6206,-122.3508,Seattle,USA,art;museum
+14,Discovery Park,park,47.6585,-122.4051,Seattle,USA,nature;hiking
+15,Gas Works Park,park,47.6456,-122.3344,Seattle,USA,views;picnic
+16,Capitol Hill Block,attraction,47.6152,-122.3210,Seattle,USA,nightlife;food

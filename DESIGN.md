@@ -10,6 +10,11 @@ Traverse is a web app written in python / fastapi and htmx to demonstrate the po
 * Leverage python tools such as datatools and fastapi to build a beautiful demonstration of api integration + geo ref for a practical use case
 * Something simple to demo to a python-based meetup
 
+## TODO
+
+- [x] Write a `README.md` with setup instructions and project overview
+- [x] Scaffold and deploy a working prototype of the design (FastAPI + HTMX + DuckDB)
+
 ## References
 
 * ~/dev/f/floatslope -> a trip navigation finder, a bit more complicated, but has a working scaffold

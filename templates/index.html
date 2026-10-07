@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="search">
+    <h2>Where to?</h2>
+    <form hx-post="/search" hx-target="#results" hx-indicator=".spinner">
+        <label>
+            Location
+            <input type="text" name="location" placeholder="e.g. Ikebukuro, Tokyo or KBFI" required>
+        </label>
+        <label>
+            Traversal method
+            <select name="method">
+                <option value="transit">Transit (train + bus)</option>
+                <option value="walk">Walking</option>
+                <option value="bike">Bicycle</option>
+                <option value="cessna 172">Cessna 172 (pilots)</option>
+            </select>
+        </label>
+        <button type="submit">Explore</button>
+        <div class="spinner htmx-indicator">Searching…</div>
+    </form>
+</section>
+
+<section id="results">
+    <!-- HTMX swaps results here -->
+</section>
+{% endblock %}

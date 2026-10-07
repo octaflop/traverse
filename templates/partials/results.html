@@ -1,0 +1,37 @@
+{% if error %}
+<div class="error">{{ error }}</div>
+{% else %}
+<div class="results">
+    <h3>Results for {{ location }} <span class="method">({{ method }})</span></h3>
+    <p class="coords">Lat: {{ "%.4f" | format(lat) }}, Lon: {{ "%.4f" | format(lon) }}</p>
+
+    {% if airports %}
+    <h4>Airports</h4>
+    <ul class="list">
+        {% for a in airports %}
+        <li>
+            <strong>{{ a.name }}</strong> <code>{{ a.ident }}</code>
+            <span class="meta">{{ a.municipality }}, {{ a.iso_country }} — {{ "%.1f" | format(a.distance_km) }} km</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if pois %}
+    <h4>Points of Interest</h4>
+    <ul class="list">
+        {% for p in pois %}
+        <li>
+            <strong>{{ p.name }}</strong>
+            <span class="tag">{{ p.type }}</span>
+            <span class="meta">{{ p.city }} — {{ "%.1f" | format(p.distance_km) }} km</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if not airports and not pois %}
+    <p class="empty">Nothing found within range. Try a different location or traversal method.</p>
+    {% endif %}
+</div>
+{% endif %}
