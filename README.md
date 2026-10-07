@@ -1,5 +1,7 @@
 # Traverse
 
+![screenshot.png](static/screenshot.png)
+
 A simple, fast web demo that shows how far you can get with **Python**, **FastAPI**, **HTMX**, and **DuckDB** — no complex frontend build pipeline required.
 
 Traverse lets you explore points of interest for a given location and "traversal method". For example:
