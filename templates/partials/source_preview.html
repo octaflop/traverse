@@ -1,0 +1,27 @@
+{% if rows %}
+<div class="preview" style="overflow-x: auto;">
+    <p style="color: var(--muted); font-size: 0.85rem;">
+        Detected reader: <code>{{ read_func }}</code> | Showing first 5 rows from <code>{{ url }}</code>
+    </p>
+    <table class="data-table">
+        <thead>
+            <tr>
+                {% for col in rows[0].keys() %}
+                <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                {% for val in row.values() %}
+                <td>{{ val }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% elif error %}
+<div class="error">Preview failed: {{ error }}</div>
+{% endif %}

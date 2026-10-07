@@ -1,0 +1,26 @@
+{% if results %}
+<ul class="dropdown-list">
+    {% for r in results %}
+    <li data-lat="{{ r.lat }}" data-lon="{{ r.lon }}"
+        data-name="{{ r.canonical_name | e }}"
+        data-code="{{ (r.lookup_code or '') | e }}"
+        data-city="{{ (r.city or '') | e }}"
+        data-country="{{ (r.country or '') | e }}">
+        <span class="dd-icon">
+            {% if r.source == 'airport' %}✈️
+            {% elif r.source == 'city' %}🏙️
+            {% elif r.source == 'poi' %}📍
+            {% elif r.source == 'navaid' %}📡
+            {% else %}📍{% endif %}
+        </span>
+        <span class="dd-name">{{ r.canonical_name }}</span>
+        {% if r.lookup_code and r.source == 'airport' %}
+        <code class="dd-code">{{ r.lookup_code }}</code>
+        {% endif %}
+        <span class="dd-meta">
+            {{ r.city or '' }}{% if r.city and r.country %}, {% endif %}{{ r.country or '' }}
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}

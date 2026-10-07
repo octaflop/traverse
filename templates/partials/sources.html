@@ -1,0 +1,30 @@
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+{% if success %}
+<div class="success">{{ success }}</div>
+{% endif %}
+
+<h4>Registered Sources</h4>
+{% if sources %}
+<ul class="list">
+    {% for s in sources %}
+    <li>
+        <strong>{{ s.name }}</strong>
+        <span class="tag">{{ s.read_func }}</span>
+        <span class="tag">{{ "snapshot" if s.materialized else "live view" }}</span>
+        <span class="meta" style="font-size: 0.75rem; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{ s.url }}
+        </span>
+        <button class="small danger"
+                hx-delete="/sources/{{ s.source_id }}"
+                hx-target="#source-list"
+                hx-confirm="Remove this source?">
+            Remove
+        </button>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="empty">No remote sources registered yet. Try the OurAirports URL above!</p>
+{% endif %}

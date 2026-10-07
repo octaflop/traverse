@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Traverse{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <header>
@@ -16,7 +18,123 @@
         {% block content %}{% endblock %}
     </main>
     <footer>
-        <small>Built with FastAPI + HTMX + DuckDB</small>
+        <small>Built with FastAPI + HTMX + DuckDB + Leaflet</small>
     </footer>
+
+    <script>
+    (function() {
+        var map = null;
+        var markers = [];
+
+        function clearMarkers() {
+            markers.forEach(function(m) { m.remove(); });
+            markers = [];
+        }
+
+        function addMarker(lat, lon, title, iconColor) {
+            var colors = {
+                origin: '#ef4444',
+                airport: '#3b82f6',
+                poi: '#22c55e',
+                waypoint: '#f97316'
+            };
+            var color = colors[iconColor] || colors.poi;
+            var svg = '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"' + color + '\" width=\"24\" height=\"24\"><circle cx=\"12\" cy=\"12\" r=\"12\"/></svg>';
+            var icon = L.divIcon({
+                className: '',
+                html: '<div style=\"background:' + color + ';width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,0.5);\"></div>',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            });
+            var m = L.marker([lat, lon], {icon: icon}).bindPopup(title);
+            m.addTo(map);
+            markers.push(m);
+            return m;
+        }
+
+        document.addEventListener('htmx:afterSettle', function(evt) {
+            var mapEl = document.getElementById('map');
+            if (!mapEl) return;
+
+            var originLat = parseFloat(mapEl.dataset.originLat || 0);
+            var originLon = parseFloat(mapEl.dataset.originLon || 0);
+            var airports = JSON.parse(mapEl.dataset.airports || '[]');
+            var pois = JSON.parse(mapEl.dataset.pois || '[]');
+            var waypoints = JSON.parse(mapEl.dataset.waypoints || '[]');
+
+            if (map) {
+                map.remove();
+                map = null;
+            }
+            clearMarkers();
+
+            map = L.map(mapEl).setView([originLat || 0, originLon || 0], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href=\"https://openstreetmap.org/copyright\">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            if (originLat && originLon) {
+                addMarker(originLat, originLon, '<b>Origin</b><br>' + (mapEl.dataset.location || ''), 'origin');
+            }
+
+            airports.forEach(function(a) {
+                addMarker(a.latitude_deg, a.longitude_deg, '<b>' + a.name + '</b> (' + a.ident + ')<br>' + a.municipality, 'airport');
+            });
+
+            pois.forEach(function(p) {
+                addMarker(p.lat, p.lon, '<b>' + p.name + '</b><br>' + (p.type || '') + '<br>' + (p.city || ''), 'poi');
+            });
+
+            waypoints.forEach(function(w) {
+                addMarker(w.lat, w.lon, '<b>' + w.name + '</b><br>' + (w.type || '') + '<br><i>user waypoint</i>', 'waypoint');
+            });
+
+            var allCoords = [];
+            if (originLat && originLon) allCoords.push([originLat, originLon]);
+            airports.forEach(function(a) { allCoords.push([a.latitude_deg, a.longitude_deg]); });
+            pois.forEach(function(p) { allCoords.push([p.lat, p.lon]); });
+            waypoints.forEach(function(w) { allCoords.push([w.lat, w.lon]); });
+
+            if (allCoords.length > 1) {
+                map.fitBounds(allCoords, {padding: [20, 20], maxZoom: 14});
+            }
+        });
+    })();
+    </script>
+    <!-- Autocomplete interaction -->
+    <script>
+    (function() {
+        document.addEventListener('click', function(e) {
+            var item = e.target.closest('.dropdown-list li');
+            if (!item) return;
+
+            var wrap = item.closest('.autocomplete-wrap');
+            if (!wrap) return;
+
+            var input = wrap.querySelector('input[name="location"]');
+            var dropdown = wrap.querySelector('.dropdown');
+            if (!input || !dropdown) return;
+
+            // Prefer canonical name, fall back to code
+            var val = item.dataset.name || item.dataset.code || '';
+            input.value = val;
+            dropdown.innerHTML = '';
+
+            // Focus back and optionally submit the form
+            input.focus();
+            // Optionally trigger search immediately:
+            // wrap.closest('form').dispatchEvent(new Event('submit'));
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete-wrap')) {
+                document.querySelectorAll('.dropdown').forEach(function(d) {
+                    d.innerHTML = '';
+                });
+            }
+        });
+    })();
+    </script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+<ul class="list">
+    {% for w in waypoints %}
+    <li>
+        <strong>{{ w.name }}</strong>
+        <span class="tag">{{ w.type or "waypoint" }}</span>
+        <span class="meta">{{ "%.5f" | format(w.lat) }}, {{ "%.5f" | format(w.lon) }}{% if w.city %} — {{ w.city }}{% endif %}</span>
+        <button class="small danger"
+                hx-delete="/waypoints/{{ w.id }}"
+                hx-target="#waypoint-list"
+                hx-confirm="Remove this waypoint?">
+            Remove
+        </button>
+    </li>
+    {% else %}
+    <li class="empty">No custom waypoints yet. Add one below.</li>
+    {% endfor %}
+</ul>

@@ -4,9 +4,20 @@
 <section class="search">
     <h2>Where to?</h2>
     <form hx-post="/search" hx-target="#results" hx-indicator=".spinner">
-        <label>
+        <label class="autocomplete-wrap">
             Location
-            <input type="text" name="location" placeholder="e.g. Ikebukuro, Tokyo or KBFI" required>
+            <input type="text"
+                   name="location"
+                   placeholder="e.g. Ikebukuro, Tokyo or KBFI"
+                   required
+                   autocomplete="off"
+                   hx-get="/autocomplete"
+                   hx-trigger="keyup changed delay:150ms"
+                   hx-target="#autocomplete-dropdown"
+                   hx-swap="innerHTML"
+                   hx-indicator=".spinner-ac">
+            <div class="spinner-ac htmx-indicator" style="position:absolute;right:0.6rem;top:2.2rem;font-size:0.75rem;color:var(--muted);">…</div>
+            <div id="autocomplete-dropdown" class="dropdown"></div>
         </label>
         <label>
             Traversal method
@@ -24,5 +35,96 @@
 
 <section id="results">
     <!-- HTMX swaps results here -->
+</section>
+
+<section class="waypoints">
+    <h2>Waypoints</h2>
+    <p class="muted">Add custom places to include in searches. They show up on the map too.</p>
+    <div id="waypoint-list" hx-get="/waypoints" hx-trigger="load">
+        <!-- HTMX swaps waypoint list here -->
+    </div>
+
+    <h3>Add Waypoint</h3>
+    <form class="inline" hx-post="/waypoints" hx-target="#waypoint-list" hx-indicator=".spinner-wp">
+        <label>
+            Name
+            <input type="text" name="name" placeholder="e.g. Grand Central Market" required>
+        </label>
+        <label>
+            Type
+            <input type="text" name="type" placeholder="e.g. food, park, museum">
+        </label>
+        <label>
+            Latitude
+            <input type="number" step="any" name="lat" placeholder="35.6764" required>
+        </label>
+        <label>
+            Longitude
+            <input type="number" step="any" name="lon" placeholder="139.6993" required>
+        </label>
+        <label>
+            City
+            <input type="text" name="city" placeholder="Tokyo">
+        </label>
+        <label>
+            Country
+            <input type="text" name="country" placeholder="Japan">
+        </label>
+        <label>
+            Tags
+            <input type="text" name="tags" placeholder="romantic, sunset">
+        </label>
+        <button type="submit">Add</button>
+        <div class="spinner-wp htmx-indicator">Adding…</div>
+    </form>
+</section>
+
+<section class="waypoints">
+    <h2>🔗 Remote Data Sources</h2>
+    <p class="muted">
+        DuckDB can query remote CSV, Parquet, and JSON files over HTTP directly.
+        Paste a URL to add it as a live view or local snapshot.
+    </p>
+
+    <form class="inline" hx-post="/sources/preview" hx-target="#source-preview" hx-indicator=".spinner-src">
+        <label style="grid-column: 1 / -1;">
+            Remote URL (CSV / Parquet / JSON)
+            <input type="url" name="url"
+                placeholder="https://example.com/data.csv"
+                required
+                style="width: 100%;">
+        </label>
+        <button type="submit">Preview 5 rows</button>
+        <div class="spinner-src htmx-indicator">Fetching…</div>
+    </form>
+
+    <div id="source-preview" style="margin-top: 1rem;">
+        <!-- HTMX swaps preview here -->
+    </div>
+
+    <h3>Register Source</h3>
+    <form class="inline" hx-post="/sources" hx-target="#source-list" hx-indicator=".spinner-reg">
+        <label>
+            Name (table/view name)
+            <input type="text" name="name" placeholder="e.g. volcanoes" required>
+        </label>
+        <label>
+            URL
+            <input type="url" name="url" placeholder="https://..." required>
+        </label>
+        <label>
+            Mode
+            <select name="materialize">
+                <option value="false">📡 Live View (queries remote each time)</option>
+                <option value="true">💾 Snapshot (copy into local DuckDB)</option>
+            </select>
+        </label>
+        <button type="submit">Register</button>
+        <div class="spinner-reg htmx-indicator">Registering…</div>
+    </form>
+
+    <div id="source-list" hx-get="/sources" hx-trigger="load" style="margin-top: 1rem;">
+        <!-- HTMX swaps source list here -->
+    </div>
 </section>
 {% endblock %}
