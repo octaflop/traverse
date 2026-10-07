@@ -29,7 +29,12 @@ async def search(
             {
                 "location": location,
                 "method": method,
-                "error": "Could not geocode that location. Try being more specific (e.g. 'Ikebukuro, Tokyo, Japan').",
+                "error": (
+                    "Could not geocode that location. "
+                    "Try an airport code (e.g. <b>KBFI</b>, <b>KSVR</b>) "
+                    "or a major city nearby. "
+                    "If you know the exact coordinates, add it as a waypoint below."
+                ),
                 "airports_json": "[]",
                 "pois_json": "[]",
                 "waypoints_json": "[]",

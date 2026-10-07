@@ -2,6 +2,8 @@
 """Bootstrap script: download public datasets and seed DuckDB."""
 
 import sys
+import zipfile
+from io import BytesIO
 from pathlib import Path
 
 import duckdb
@@ -12,16 +14,19 @@ DB_PATH = DATA_DIR / "traverse.db"
 
 AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 NAVAIDS_URL = "https://davidmegginson.github.io/ourairports-data/navaids.csv"
-CITIES_CSV = DATA_DIR / "cities.csv"
+CITIES500_URL = "http://download.geonames.org/export/dump/cities500.zip"
+
 POIS_CSV = DATA_DIR / "pois.csv"
+CITIES_CSV = DATA_DIR / "cities.csv"
 
 AIRPORTS_CSV = DATA_DIR / "airports.csv"
 NAVAIDS_CSV = DATA_DIR / "navaids.csv"
+CITIES500_ZIP = DATA_DIR / "cities500.zip"
 
 
 def download(url: str, dest: Path) -> None:
     print(f"Downloading {url} ...")
-    with httpx.stream("GET", url, follow_redirects=True, timeout=60) as resp:
+    with httpx.stream("GET", url, follow_redirects=True, timeout=120) as resp:
         resp.raise_for_status()
         with open(dest, "wb") as f:
             for chunk in resp.iter_bytes(chunk_size=65536):
@@ -29,37 +34,102 @@ def download(url: str, dest: Path) -> None:
     print(f"Saved to {dest}")
 
 
+def _download_cities500() -> Path:
+    """Download and extract the Geonames cities500 dataset."""
+    CITIES500_ZIP.parent.mkdir(parents=True, exist_ok=True)
+    download(CITIES500_URL, CITIES500_ZIP)
+
+    print(f"Extracting {CITIES500_ZIP} ...")
+    cities500_txt = CITIES500_ZIP.with_suffix(".txt")
+    with zipfile.ZipFile(CITIES500_ZIP, "r") as z:
+        for name in z.namelist():
+            if name.endswith(".txt") and "cities500" in name:
+                z.extract(name, CITIES500_ZIP.parent)
+                extracted = CITIES500_ZIP.parent / name
+                extracted.rename(cities500_txt)
+                break
+    print(f"Extracted to {cities500_txt}")
+    return cities500_txt
+
+
 def _load_cities(conn: duckdb.DuckDBPyConnection) -> None:
-    """Load supplementary city locations from CSV."""
+    """Load city locations from Geonames cities500 + local CSV, deduplicate."""
+    conn.execute("DROP TABLE IF EXISTS cities_raw")
     conn.execute("DROP TABLE IF EXISTS cities")
+
+    # Load cities500 from Geonames (TSV, no header)
+    # columns: geonameid name asciiname alternatenames lat lon fclass fcode
+    #          country cc2 admin1 admin2 admin3 admin4 population elevation dem
+    #          timezone moddate
+    cities500_txt = _download_cities500()
+    conn.execute(
+        """
+        CREATE TABLE cities_raw AS
+        SELECT
+            column00::INTEGER AS geonameid,
+            column01 AS name,
+            column02 AS asciiname,
+            TRY_CAST(column04 AS DOUBLE) AS lat,
+            TRY_CAST(column05 AS DOUBLE) AS lon,
+            column08 AS country_code,
+            TRY_CAST(column14 AS BIGINT) AS population
+        FROM read_csv(?, header=false, delim='\\t', quote='')
+        """,
+        [str(cities500_txt)],
+    )
+    # Keep only rows with valid lat/lon
+    conn.execute(
+        """
+        DELETE FROM cities_raw
+        WHERE lat IS NULL OR lon IS NULL
+        """
+    )
+    count = conn.execute("SELECT COUNT(*) FROM cities_raw").fetchone()[0]
+    print(f"Loaded {count} cities from Geonames cities500.")
+
+    # Also load local CSV if present
     if CITIES_CSV.exists():
         conn.execute(
             """
-            CREATE TABLE cities AS
-            SELECT name, country_code, lat, lon
+            INSERT INTO cities_raw (name, asciiname, lat, lon, country_code, population)
+            SELECT name, name, lat, lon, country_code, 0
             FROM read_csv(?, header=true, nullstr='')
             """,
             [str(CITIES_CSV)],
         )
-        # Deduplicate by name+country_code average coordinates
-        conn.execute(
-            """
-            CREATE TABLE cities_dedup AS
-            SELECT name, country_code, avg(lat) AS lat, avg(lon) AS lon
-            FROM cities GROUP BY name, country_code
-            """
+        csv_count = conn.execute(
+            "SELECT COUNT(*) FROM cities_raw WHERE population = 0"
+        ).fetchone()[0]
+        print(f"Also loaded {csv_count} supplemental cities from CSV.")
+
+    # Deduplicate: keep highest population per name+country
+    conn.execute(
+        """
+        CREATE TABLE cities AS
+        SELECT
+            name,
+            country_code,
+            lat,
+            lon
+        FROM (
+            SELECT
+                name,
+                country_code,
+                lat,
+                lon,
+                ROW_NUMBER() OVER (
+                    PARTITION BY name, country_code
+                    ORDER BY population DESC, geonameid ASC
+                ) AS rn
+            FROM cities_raw
         )
-        conn.execute("DROP TABLE cities")
-        conn.execute("ALTER TABLE cities_dedup RENAME TO cities")
-        conn.execute("CREATE INDEX idx_cities_name ON cities(name)")
-        conn.execute("CREATE INDEX idx_cities_country ON cities(country_code)")
-        count = conn.execute("SELECT COUNT(*) FROM cities").fetchone()[0]
-        print(f"Loaded {count} supplemental cities.")
-    else:
-        conn.execute(
-            "CREATE TABLE cities (name VARCHAR, country_code VARCHAR, lat DOUBLE, lon DOUBLE)"
-        )
-        print("No cities.csv found; created empty table.")
+        WHERE rn = 1
+        """
+    )
+    conn.execute("CREATE INDEX idx_cities_name ON cities(name)")
+    conn.execute("CREATE INDEX idx_cities_country ON cities(country_code)")
+    count = conn.execute("SELECT COUNT(*) FROM cities").fetchone()[0]
+    print(f"Deduplicated to {count} unique cities.")
 
 
 def _build_geocodes(conn: duckdb.DuckDBPyConnection) -> None:
@@ -135,7 +205,7 @@ def _build_geocodes(conn: duckdb.DuckDBPyConnection) -> None:
 
         UNION ALL
 
-        -- Cities from supplemental CSV
+        -- Cities from geonames + supplemental CSV
         SELECT
             'city' AS source,
             name AS lookup_code,

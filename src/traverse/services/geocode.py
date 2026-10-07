@@ -1,5 +1,7 @@
 """Geocode locations via Nominatim (OpenStreetMap) with local fallback."""
 
+import re
+
 import httpx
 
 from traverse.db import get_connection
@@ -25,6 +27,31 @@ async def geocode_location(q: str) -> tuple[float, float] | None:
 
     # Fallback: unified offline lookup across airports, cities, pois, navaids
     return _local_geocode(q)
+
+
+def _candidate_city_names(q: str) -> list[str]:
+    """Extract possible city-name queries from free-text input."""
+    q = q.strip()
+    candidates = [q]
+    # "Cottonwood Heights, UT" -> "Cottonwood Heights"
+    if "," in q:
+        candidates.append(q.split(",")[0].strip())
+    # "Ikebukuro Tokyo Japan" -> "Ikebukuro" and "Ikebukuro Tokyo"
+    parts = [p for p in re.split(r"[\s,]+", q) if p]
+    if len(parts) > 1:
+        candidates.append(parts[0])
+    # "UT" might be part of a state code — try without it
+    if len(parts) >= 2 and len(parts[-1]) <= 3 and parts[-1].isalpha():
+        candidates.append(" ".join(parts[:-1]))
+    # Remove duplicates while preserving order
+    seen = set()
+    out = []
+    for c in candidates:
+        key = c.lower()
+        if key not in seen and len(key) >= 2:
+            seen.add(key)
+            out.append(c)
+    return out
 
 
 def _local_geocode(q: str) -> tuple[float, float] | None:
@@ -60,43 +87,44 @@ def _local_geocode(q: str) -> tuple[float, float] | None:
     if row:
         return float(row[0]), float(row[1])
 
-    # Starts-with name (e.g. "Nara" matches "Nara, JP")
-    row = conn.execute(
-        "SELECT lat, lon FROM geocodes WHERE canonical_name ILIKE ? || '%' ORDER BY source='city' DESC LIMIT 1",
-        [q_clean],
-    ).fetchone()
-    if row:
-        return float(row[0]), float(row[1])
+    # Try derived city-name candidates (handles "Cottonwood Heights, UT", etc.)
+    for candidate in _candidate_city_names(q_clean):
+        # Starts-with name
+        row = conn.execute(
+            "SELECT lat, lon FROM geocodes WHERE canonical_name ILIKE ? || '%' ORDER BY source='city' DESC LIMIT 1",
+            [candidate],
+        ).fetchone()
+        if row:
+            return float(row[0]), float(row[1])
 
-    # City prefix
-    row = conn.execute(
-        "SELECT lat, lon FROM geocodes WHERE city ILIKE ? || '%' ORDER BY source='city' DESC LIMIT 1",
-        [q_clean],
-    ).fetchone()
-    if row:
-        return float(row[0]), float(row[1])
+        # City prefix
+        row = conn.execute(
+            "SELECT lat, lon FROM geocodes WHERE city ILIKE ? || '%' ORDER BY source='city' DESC LIMIT 1",
+            [candidate],
+        ).fetchone()
+        if row:
+            return float(row[0]), float(row[1])
 
-    # Contains in search_text (last resort)
-    row = conn.execute(
-        """
-        SELECT lat, lon FROM geocodes
-        WHERE search_text ILIKE '%' || ? || '%'
-        ORDER BY
-            CASE source
-                WHEN 'city' THEN 1
-                WHEN 'poi' THEN 2
-                WHEN 'airport' THEN 3
-                WHEN 'navaid' THEN 4
-            END
-        LIMIT 1
-        """,
-        [q_clean],
-    ).fetchone()
-    if row:
-        return float(row[0]), float(row[1])
+        # Contains in search_text
+        row = conn.execute(
+            """
+            SELECT lat, lon FROM geocodes
+            WHERE search_text ILIKE '%' || ? || '%'
+            ORDER BY
+                CASE source
+                    WHEN 'city' THEN 1
+                    WHEN 'poi' THEN 2
+                    WHEN 'airport' THEN 3
+                    WHEN 'navaid' THEN 4
+                END
+            LIMIT 1
+            """,
+            [candidate],
+        ).fetchone()
+        if row:
+            return float(row[0]), float(row[1])
 
-    # Very fuzzy fallback: partial code match
-    # This catches things like "U42" matching "MU42", "KU42", etc.
+    # Very fuzzy fallback on the raw string: partial code match
     row = conn.execute(
         "SELECT lat, lon FROM geocodes WHERE lookup_code ILIKE '%' || ? || '%' ORDER BY source='airport' DESC LIMIT 1",
         [q_clean],
